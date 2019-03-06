@@ -1,0 +1,55 @@
+###in "ISComm.h" Inertial_SenseSDK1-7.5/src/###
+line 56:
+#define _DID_GPS1_RAW				DID_GPS1_RAW
+
+
+###in ISCommunicationsExample.c###
+Tips: -Wall -Wextra -Werror -pedantic -g -fsanitize=adress gdb
+
+line 43:
+New function for raw messages:
+static void handleGPSRawMessage(gps_raw_t* imu)
+{
+	//printf("\n in handleGPSRawMessage\n"	);
+	
+	//printf("raw.data: %d, raw.dataType: %d, raw.obsCount: %d, raw.reserved: %d \n", raw->data.obs->P[0], raw->dataType, raw->obsCount, raw->reserved);
+	printf("Obs count: %d, time: %d  Pseudoranges: ", raw->obsCount, raw->data.obs->time.time);
+	for (int i = 0; i < raw->obsCount; i = i++) 
+	{
+		printf(" %d", raw->data.obs[i].P);
+	}
+	printf("\n");
+}
+
+line 106&116: 
+Changed to _DID_GPS1_RAW (Uncertain if this is necessary)
+
+changed step 6:
+Intention is to update this to a 
+   // STEP 6: Enable message broadcasting
+	// Ask for INS message w/ update 40ms period (4ms source period x 10).  Set data rate to zero to disable broadcast and pull a single packet.
+	if (error = enable_message_broadcasting_get_data(&serialPort, &comm))
+	{
+		return error;
+	}
+	// Ask for INS message w/ update 40ms period (4ms source period x 10).  Set data rate to zero to disable broadcast and pull a single packet.
+	int messageSize = is_comm_get_data(&comm, _DID_INS_LLA_EULER_NED, 0, 0, 10);
+	if (messageSize != serialPortWrite(&serialPort, &comm.buffer, messageSize))
+	{
+		printf("Failed to encode and write get INS message\r\n");
+	}
+
+#if 1
+	// Ask for GPS message at period of 200ms (200ms source period x 1).  Offset and size can be left at 0 unless you want to just pull a specific field from a data set
+	messageSize = is_comm_get_data(&comm, _DID_GPS1_POS, 0, 0, 1);
+	if (messageSize != serialPortWrite(&serialPort, &comm.buffer, messageSize))
+	{
+		printf("Failed to encode and write get GPS message\r\n");
+	}
+#endif
+
+Changed step 8:
+included case:
+	case DID_GPS1_RAW:
+		handleGPSRawMessage((gps_raw_t*)buffer);
+		
