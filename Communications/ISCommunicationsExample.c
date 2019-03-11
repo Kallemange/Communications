@@ -146,7 +146,7 @@ void createLogs(char* path, char* type, char* timeStamp, int val) {
 	}
 	strcat(path, type);
 	strcat(path, timeStamp);
-	char format[5] = ".txt";
+	char format[5] = ".csv";
 	strcat(path, format);
 
 	FILE * log = fopen(path, "a");
@@ -164,19 +164,25 @@ void createLogs(char* path, char* type, char* timeStamp, int val) {
 		fprintf(log, "timeOfWeek, lla0,lla1,lla2,ned0,ned1,ned2,theta0,theta1,theta2\n");
 		break;
 	case 1:
-		fprintf(log, "dataType, obsCount, time(whole), time(frac), pseudoRange[#obsCount]\n");
+		//Previous log format, creating a too long file forcing linebreak in log
+		//fprintf(log, "obsCount, time1, time2, sat, rcv, SNR, LLI, code, qualL, qualP, reserved, L, P, D\n");
+		fprintf(log, "obsCount, time1, time2, sat, SNR, LLI, code,P\n");
 		break;
 	case 2:
-		fprintf(log, "Ephemeris\n");
+		fprintf(log, "sat, iode, iodc, sva, svh, week, code, flag,\
+toe1, toe2, toc1, toc2, ttr1, ttr2, A, e, i0, OMG0, omg, \
+M0, deln, OMGd, idot, crc, crs, cuc, cus, cic, cis, toes, fit, \
+f0, f1, f2\n");
 		break;
 	case 3:
-		fprintf(log, "Glonass Ephemeris\n");
+		fprintf(log, "sat, iode, frq, svh, sva, age, toe, tof\
+pos0, pos1, pos2, vel0, vel1, vel2, acc0, acc1, acc2, taun, gamn, dtaun, \n");
 		break;
 	case 4:
-		fprintf(log, "SBAS\n");
+		fprintf(log, "week, tow, prn, msg, reserved\n");
 		break;
 	case 5:
-		fprintf(log, "baseAntenna\n");
+		fprintf(log, "deltype, pos0, pos1, pos2, del0, del1, del2, hgt, stationId\n");
 		break;
 	case 6:
 		fprintf(log, "ionosphereModel");
@@ -250,7 +256,7 @@ int main(int argc, char* argv[])
 		printf("Failed to open serial port on com port %s\r\n", argv[1]);
 		return -2;
 	}
-
+	//printf("opened port");
 
 	int error;
 
@@ -275,6 +281,7 @@ int main(int argc, char* argv[])
 	{
 		return error;
 	}
+	//printf("Requesting messages");
 	// Ask for INS message w/ update 40ms period (4ms source period x 10).  Set data rate to zero to disable broadcast and pull a single packet.
 	int messageSize = is_comm_get_data(&comm, _DID_INS_LLA_EULER_NED, 0, 0, 10);
 	//if (messageSize != serialPortWrite(&serialPort, &comm.buffer, messageSize))
@@ -296,14 +303,15 @@ int main(int argc, char* argv[])
     save_persistent_messages(&serialPort, &comm);
 #endif
 
-
+	//printf("step 8");
 	// STEP 8: Handle received data
 	int count;
 	uint8_t inByte;
-
+	//printf("starting while(running)");
 	// You can set running to false with some other piece of code to break out of the loop and end the program
 	while (running)
 	{
+		//printf("in while(running)");
 		// Read one byte with a 20 millisecond timeout
 		while ((count = serialPortReadCharTimeout(&serialPort, &inByte, 20)) > 0)
 		{
