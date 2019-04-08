@@ -11,6 +11,26 @@
 	All six paths are sent as a temporary solution. 
 */
 
+static void w2fSat(gps_sat_t *sat, char* path) {
+	FILE * log = fopen(path, "a");
+	if (!log) {
+		log = fopen(path, "w");
+	}
+	if (!log) {
+		printf("File does not exist\n");
+		return;
+	}
+	fprintf(log,"%"PRIu32",%d,", sat->timeOfWeekMs, sat->numSats);
+	for (int i = 0; i < sat->numSats; i++) {
+		fprintf(log, "%"PRIu8",%"PRIu8",%d,%d,%d,%d,",
+			sat->sat[i].gnssId, sat->sat[i].svId, sat->sat[i].elev,
+			sat->sat[i].azim, sat->sat[i].prRes, sat->sat[i].cno);
+	}
+	fprintf(log, "\n");
+	fclose(log);
+}
+
+
 /*Args: raw, path for log, print to terminal 1/0*/
 static void w2f(gps_raw_t *raw, char* path1, char* path2, char* path3, char* path4, char* path5, char* path6, int print) {
 //static void w2f(gps_raw_t *raw, char* path1, int print) {

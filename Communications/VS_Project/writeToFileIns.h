@@ -19,7 +19,7 @@ static void w2fIns(ins_1_t *ins, char* path) {
 		printf("File does not exist\n");
 		return;
 	}
-	fprintf(log, "%.3fs, %3.7f, %3.7f, %5.2f, %f, %f, %f, %5.1f, %5.1f, %5.1f\n",
+	fprintf(log, "%.3f, %3.7f, %3.7f, %5.2f, %f, %f, %f, %5.1f, %5.1f, %5.1f\n",
 		ins->timeOfWeek,
 		ins->lla[0], ins->lla[1], ins->lla[2],
 		ins->ned[0], ins->ned[1], ins->ned[2],
